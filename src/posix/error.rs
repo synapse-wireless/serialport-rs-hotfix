@@ -16,45 +16,44 @@ impl From<libudev::Error> for Error {
 
 impl From<nix::Error> for Error {
     fn from(e: nix::Error) -> Error {
+        // This used to deal with InvalidPath/InvalidUtf8, but those aren't present in nix::Error any more?
         match e {
-            nix::Error::InvalidPath | nix::Error::InvalidUtf8 => {
-                Error::new(ErrorKind::InvalidInput, "Invalid input")
-            }
-            nix::Error::UnsupportedOperation => Error::new(ErrorKind::Unknown, "Unknown error"),
-            nix::Error::Sys(e @ nix::errno::Errno::ETIMEDOUT) => {
+            nix::Error::ETIMEDOUT => {
                 Error::new(ErrorKind::Io(io::ErrorKind::TimedOut), e.desc())
             }
-            nix::Error::Sys(e @ nix::errno::Errno::ECONNABORTED) => {
+            nix::Error::ECONNABORTED => {
                 Error::new(ErrorKind::Io(io::ErrorKind::ConnectionAborted), e.desc())
             }
-            nix::Error::Sys(e @ nix::errno::Errno::ECONNRESET) => {
+            nix::Error::ECONNRESET => {
                 Error::new(ErrorKind::Io(io::ErrorKind::ConnectionReset), e.desc())
             }
-            nix::Error::Sys(e @ nix::errno::Errno::ECONNREFUSED) => {
+            nix::Error::ECONNREFUSED => {
                 Error::new(ErrorKind::Io(io::ErrorKind::ConnectionRefused), e.desc())
             }
-            nix::Error::Sys(e @ nix::errno::Errno::ENOTCONN) => {
+            nix::Error::ENOTCONN => {
                 Error::new(ErrorKind::Io(io::ErrorKind::NotConnected), e.desc())
             }
-            nix::Error::Sys(e @ nix::errno::Errno::EADDRINUSE) => {
+            nix::Error::EADDRINUSE => {
                 Error::new(ErrorKind::Io(io::ErrorKind::AddrInUse), e.desc())
             }
-            nix::Error::Sys(e @ nix::errno::Errno::EADDRNOTAVAIL) => {
+            nix::Error::EADDRNOTAVAIL => {
                 Error::new(ErrorKind::Io(io::ErrorKind::AddrNotAvailable), e.desc())
             }
-            nix::Error::Sys(e @ nix::errno::Errno::EAGAIN) => {
+            nix::Error::EAGAIN => {
                 Error::new(ErrorKind::Io(io::ErrorKind::WouldBlock), e.desc())
             }
-            nix::Error::Sys(e @ nix::errno::Errno::EINTR) => {
+            nix::Error::EINTR => {
                 Error::new(ErrorKind::Io(io::ErrorKind::Interrupted), e.desc())
             }
-            nix::Error::Sys(e @ nix::errno::Errno::EACCES) => {
+            nix::Error::EACCES => {
                 Error::new(ErrorKind::Io(io::ErrorKind::PermissionDenied), e.desc())
             }
-            nix::Error::Sys(e @ nix::errno::Errno::ENOENT) => {
+            nix::Error::ENOENT => {
                 Error::new(ErrorKind::Io(io::ErrorKind::NotFound), e.desc())
             }
-            nix::Error::Sys(e) => Error::new(ErrorKind::Unknown, e.desc()),
+            _ => {
+                Error::new(ErrorKind::Unknown, e.desc())
+            }
         }
     }
 }
